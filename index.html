@@ -510,8 +510,8 @@
     <div class="temp-content">
       <form id="formTemporalidade">
         <div class="temp-grid">
-          <div class="temp-group"><label for="tipoLog">Tipo Log</label><select id="tipoLog" name="tipoLog" required><option value="">Selecione...</option><option value="1">Auditoria</option><option value="2">Acesso</option><option value="3">Operacional</option><option value="4">Erro do Sistema</option></select></div>
-          <div class="temp-group"><label for="acao">Ação</label><select id="acao" name="acao" required><option value="">Selecione...</option><option value="1">Exclusão</option><option value="2">Alteração</option><option value="3">Inclusão</option><option value="4">Consulta</option></select></div>
+          <div class="temp-group"><label for="tipoLog">Tipo Log</label><select id="tipoLog" name="tipoLog" required><option value="">Selecione...</option><option value="LOGIN">LOGIN</option><option value="LOGOUT">LOGOUT</option><option value="USUARIO">USUARIO</option></select></div>
+          <div class="temp-group"><label for="acao">Ação</label><select id="acao" name="acao" required><option value="">Selecione...</option><option value="ENTROU NO SISTEMA">ENTROU NO SISTEMA</option><option value="SAIU DO SISTEMA">SAIU DO SISTEMA</option><option value="TROCOU SENHA">TROCOU SENHA</option></select></div>
           <div class="temp-group"><label for="classificacao">Classificação</label><select id="classificacao" name="classificacao" required><option value="">Selecione...</option><option value="1">Pública</option><option value="2">Reservada</option><option value="3">Confidencial</option><option value="4">Secreta</option></select></div>
           <div class="temp-group"><label for="prazoGuarda">Prazo de Guarda</label><select id="prazoGuarda" name="prazoGuarda" required><option value="">Selecione...</option><option value="1">1 Ano</option><option value="2">5 Anos</option><option value="3">10 Anos</option><option value="4">Permanente</option></select></div>
         </div>
@@ -528,6 +528,24 @@
   if(!overlay||!opener||!form)return;
   function openPopup(){overlay.style.setProperty('display','flex','important');document.body.style.overflow='hidden';var first=overlay.querySelector('select');if(first)first.focus();}
   function closePopup(){overlay.style.setProperty('display','none','important');document.body.style.overflow='';opener.focus();}
+  // Prazo sugerido automaticamente conforme o tipo de log e a ação selecionados.
+  var tipoLog=document.getElementById('tipoLog');
+  var acao=document.getElementById('acao');
+  var prazo=document.getElementById('prazoGuarda');
+  function atualizarPrazoGuarda(){
+    var tipo=(tipoLog.value||'').toUpperCase();
+    var acaoSelecionada=(acao.value||'').toUpperCase();
+    if(!tipo || !acaoSelecionada){prazo.value='';return;}
+    // As imagens do grid confirmam os tipos e ações, mas não exibem o prazo de guarda.
+    // Não atribuir um prazo arbitrário: preencher somente quando houver uma regra oficial configurada.
+    var regrasPrazoGuarda = {};
+    var chave = tipo + '|' + acaoSelecionada;
+    prazo.value = Object.prototype.hasOwnProperty.call(regrasPrazoGuarda, chave)
+      ? regrasPrazoGuarda[chave]
+      : '';
+  }
+  tipoLog.addEventListener('change',atualizarPrazoGuarda);
+  acao.addEventListener('change',atualizarPrazoGuarda);
   opener.addEventListener('click',function(e){e.preventDefault();openPopup();});
   document.getElementById('temporalidade-close').addEventListener('click',function(e){e.preventDefault();closePopup();});
   document.getElementById('temporalidade-cancel').addEventListener('click',closePopup);
